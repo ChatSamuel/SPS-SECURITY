@@ -1,4 +1,17 @@
+# Python
 __pycache__/
-quarantine/
 *.pyc
-scan_report.json
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Logs
+logs/
+
+# Environment
+.env
+
+# OS
+.DS_Store

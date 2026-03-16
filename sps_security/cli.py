@@ -11,10 +11,10 @@ def load_file(path):
 
 def run():
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="SPS Security Scanner")
 
-    parser.add_argument("command")
-    parser.add_argument("target")
+    parser.add_argument("command", help="scan")
+    parser.add_argument("target", help="folder or file")
 
     args = parser.parse_args()
 
@@ -24,5 +24,4 @@ def run():
     patterns = signatures
 
     if args.command == "scan":
-
         scan_folder(args.target, signatures, hashes, patterns)

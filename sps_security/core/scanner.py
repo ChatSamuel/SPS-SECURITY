@@ -7,6 +7,7 @@ from sps_security.core.signature_engine import signature_scan
 from sps_security.core.heuristic_engine import heuristic_scan
 from sps_security.core.binary_engine import binary_scan
 from sps_security.utils.quarantine import quarantine
+from sps_security.utils.logger import log
 
 # extensões ignoradas
 IGNORE_EXT = (".py", ".pyc")
@@ -21,24 +22,33 @@ def scan_file(file, signatures, hashes, patterns):
     if file.endswith(IGNORE_EXT):
         return False
 
-    # hash detection
-    if hash_scan(file, hashes):
-        quarantine(file)
-        return True
+    try:
 
-    # signature detection
-    if signature_scan(file, signatures):
-        quarantine(file)
-        return True
-
-    # heuristic detection
-    if heuristic_scan(file):
-        return True
-
-    # binary scan
-    if file.endswith((".exe", ".dll", ".apk", ".bin")):
-        if binary_scan(file, patterns):
+        # HASH detection
+        if hash_scan(file, hashes):
+            log(f"HASH DETECTED: {file}")
+            quarantine(file)
             return True
+
+        # SIGNATURE detection
+        if signature_scan(file, signatures):
+            log(f"SIGNATURE DETECTED: {file}")
+            quarantine(file)
+            return True
+
+        # HEURISTIC detection
+        if heuristic_scan(file):
+            log(f"HEURISTIC DETECTED: {file}")
+            return True
+
+        # BINARY detection
+        if file.endswith((".exe", ".dll", ".apk", ".bin")):
+            if binary_scan(file, patterns):
+                log(f"BINARY DETECTED: {file}")
+                return True
+
+    except Exception as e:
+        log(f"ERROR scanning {file}: {e}")
 
     return False
 
@@ -49,7 +59,7 @@ def scan_folder(folder, signatures, hashes, patterns):
 
     for root, dirs, names in os.walk(folder):
 
-        # remover pastas ignoradas
+        # remover diretórios ignorados
         dirs[:] = [d for d in dirs if d not in IGNORE_DIRS]
 
         for name in names:
