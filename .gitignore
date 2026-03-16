@@ -1,3 +1,4 @@
 __pycache__/
+quarantine/
 *.pyc
-.env
+scan_report.json

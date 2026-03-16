@@ -1,7 +1,0 @@
-{
-    "files_scanned": 7,
-    "threats_found": 1,
-    "threat_files": [
-        "./malware_test.txt"
-    ]
-}
