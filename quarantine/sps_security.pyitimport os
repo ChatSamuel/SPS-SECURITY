@@ -1,0 +1,141 @@
+
+init(autoreset=True)
+
+logo = f"""
+{Fore.CYAN}
+ ███████╗██████╗ ███████╗
+ ██╔════╝██╔══██╗██╔════╝
+ ███████╗██████╔╝███████╗
+ ╚════██║██╔═══╝ ╚════██║
+ ███████║██║     ███████║
+ ╚══════╝╚═╝     ╚══════╝
+{Fore.GREEN}
+        SPS - SECURITY
+    Malware Detection Tool
+        by Samuel Pontes
+"""
+
+signatures = [
+    "powershell",
+    "cmd.exe",
+    "wget",
+    "curl",
+    "base64"
+]
+
+
+def loading():
+
+    print(Fore.YELLOW + "Initializing SPS-SECURITY", end="")
+
+    for i in range(5):
+        time.sleep(0.4)
+        print(".", end="", flush=True)
+
+    print(Fore.GREEN + "\nSystem ready!\n")
+
+
+def scan_file(file_path):
+
+    if "sps_security.py" in file_path:
+        return False
+
+    try:
+
+        with open(file_path, "r", errors="ignore") as f:
+
+            content = f.read()
+
+            for sig in signatures:
+
+                if sig in content:
+
+                    print(Fore.RED +
+                          f"[ALERT] Malware signature detected: {sig} in {file_path}")
+
+                    return True
+
+    except:
+        pass
+
+    return False
+
+
+def scan_folder(folder):
+
+    files_scanned = 0
+    threats_found = 0
+
+    print(Fore.CYAN + "\n[SCAN] Starting analysis...\n")
+
+    for root, dirs, files in os.walk(folder):
+
+        for file in files:
+
+            path = os.path.join(root, file)
+
+            files_scanned += 1
+
+            if scan_file(path):
+
+                threats_found += 1
+
+    print(Fore.GREEN + "\n[RESULT]")
+    print("Files scanned:", files_scanned)
+    print("Threats found:", threats_found)
+    print("")
+
+
+def menu():
+
+    print(Fore.WHITE + "1 - Scan file")
+    print("2 - Scan folder")
+    print("3 - Exit")
+
+    choice = input(Fore.YELLOW + "\nSelect an option: ")
+
+    return choice
+
+
+def main():
+
+    print(logo)
+
+    loading()
+
+    while True:
+
+        option = menu()
+
+        if option == "1":
+
+            file_path = input("Enter file path: ")
+
+            if scan_file(file_path):
+
+                print(Fore.RED + "Threat detected!\n")
+
+            else:
+
+                print(Fore.GREEN + "No threats found.\n")
+
+        elif option == "2":
+
+            folder = input("Enter folder path: ")
+
+            scan_folder(folder)
+
+        elif option == "3":
+
+            print(Fore.CYAN + "Closing SPS-SECURITY...\n")
+
+            break
+
+        else:
+
+            print(Fore.RED + "Invalid option\n")
+
+
+if __name__ == "__main__":
+    main()	
+

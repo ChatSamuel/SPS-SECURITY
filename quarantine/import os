@@ -1,0 +1,127 @@
+s
+import time
+from colorama import Fore, Style, init
+
+init()
+
+logo = f"""
+{Fore.CYAN}
+ ███████╗██████╗ ███████╗
+ ██╔════╝██╔══██╗██╔════╝
+ ███████╗██████╔╝███████╗
+ ╚════██║██╔═══╝ ╚════██║
+ ███████║██║     ███████║
+ ╚══════╝╚═╝     ╚══════╝
+{Fore.GREEN}
+        SPS - SECURITY
+   Malware Detection Tool
+      by Samuel Pontes
+{Style.RESET_ALL}
+"""
+
+signatures = [
+    "powershell",
+    "cmd.exe",
+    "wget",
+    "curl",
+    "base64"
+]
+
+
+def loading():
+    print(Fore.YELLOW + "Inicializando SPS-SECURITY", end="")
+    
+    for i in range(5):
+        time.sleep(0.4)
+        print(".", end="")
+        sys.stdout.flush()
+
+    print(Fore.GREEN + "\nSistema carregado!\n")
+
+
+def scan_file(file_path):
+
+    if "sps_security.py" in file_path:
+        return False
+
+    try:
+        with open(file_path, "r", errors="ignore") as file:
+            content = file.read()
+
+        for sig in signatures:
+
+            if sig in content:
+                print(Fore.RED + f"[ALERTA] Malware detectado: {sig} em {file_path}")
+
+                return True
+
+    except:
+        pass
+
+    return False
+
+
+def scan_folder(folder):
+
+    arquivos = 0
+    ameacas = 0
+
+    print(Fore.CYAN + "\n[SCAN] Iniciando análise...\n")
+
+    for root, dirs, files in os.walk(folder):
+
+        for file in files:
+
+            path = os.path.join(root, file)
+
+            arquivos += 1
+
+            if scan_file(path):
+                ameacas += 1
+
+    print(Fore.GREEN + "\n[RESULTADO]")
+    print("Arquivos analisados:", arquivos)
+    print("Ameaças encontradas:", ameacas)
+    print("")
+
+
+def menu():
+
+    print(Fore.WHITE + "1 - Escanear arquivo")
+    print("2 - Escanear pasta")
+    print("3 - Sair")
+
+    escolha = input(Fore.YELLOW + "\nEscolha uma opção: ")
+
+    return escolha
+
+
+print(logo)
+
+loading()
+
+while True:
+
+    opcao = menu()
+
+    if opcao == "1":
+
+        arquivo = input("Digite o caminho do arquivo: ")
+
+        if scan_file(arquivo):
+            print(Fore.RED + "Arquivo suspeito detectado\n")
+        else:
+            print(Fore.GREEN + "Nenhuma ameaça encontrada\n")
+
+    elif opcao == "2":
+
+        pasta = input("Digite o caminho da pasta: ")
+
+        scan_folder(pasta)
+
+    elif opcao == "3":
+
+        print(Fore.CYAN + "Encerrando SPS-SECURITY...\n")
+
+        break	
+
