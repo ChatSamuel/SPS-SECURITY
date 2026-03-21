@@ -1,17 +1,43 @@
+"""
+utils/logger.py
+O diário do antivírus. Tudo que acontece é anotado
+com data, hora e resultado. Você pode revisar depois.
+"""
+
 import logging
-import os
+import json
+from datetime import datetime
+from pathlib import Path
 
-LOG_DIR = "logs"
-LOG_FILE = os.path.join(LOG_DIR, "scan.log")
+LOG_DIR = Path.home() / ".sps_security" / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-if not os.path.exists(LOG_DIR):
-    os.mkdir(LOG_DIR)
 
-logging.basicConfig(
-    filename=LOG_FILE,
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+def get_logger(name: str = "sps"):
+    logger = logging.getLogger(name)
 
-def log(message):
-    logging.info(message)
+    # Evita duplicar handlers
+    if logger.handlers:
+        return logger
+
+    logger.setLevel(logging.DEBUG)
+
+    log_file = LOG_DIR / f"sps_{datetime.now().strftime('%Y%m%d')}.log"
+
+    fh = logging.FileHandler(log_file, encoding="utf-8")
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(logging.Formatter(
+        "%(asctime)s | %(levelname)-8s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S"
+    ))
+
+    logger.addHandler(fh)
+    return logger
+
+
+def log_scan_result(result: dict) -> None:
+    """Salva resultado de scan em JSON (histórico completo)."""
+    json_log = LOG_DIR / "scan_history.jsonl"
+
+    with open(json_log, "a", encoding="utf-8") as f:
+        f.write(json.dumps(result, default=str) + "\n")

@@ -1,88 +1,45 @@
+"""
+core/scanner.py
+Percorre diretórios e envia arquivos para o MultiEngine.
+"""
+
 import os
-from concurrent.futures import ThreadPoolExecutor
-from tqdm import tqdm
+from pathlib import Path
 
-from sps_security.core.hash_engine import hash_scan
-from sps_security.core.signature_engine import signature_scan
-from sps_security.core.heuristic_engine import heuristic_scan
-from sps_security.core.binary_engine import binary_scan
-from sps_security.utils.quarantine import quarantine
-from sps_security.utils.logger import log
-
-# extensões ignoradas
-IGNORE_EXT = (".py", ".pyc")
-
-# pastas ignoradas
-IGNORE_DIRS = ["quarantine", "__pycache__", "database"]
+from .multi_engine import MultiEngine
 
 
-def scan_file(file, signatures, hashes, patterns):
+class Scanner:
 
-    # ignorar arquivos de código
-    if file.endswith(IGNORE_EXT):
-        return False
+    def __init__(self):
+        self.engine = MultiEngine()
 
-    try:
+    def scan(self, path):
 
-        # HASH detection
-        if hash_scan(file, hashes):
-            log(f"HASH DETECTED: {file}")
-            quarantine(file)
-            return True
+        path = Path(path)
 
-        # SIGNATURE detection
-        if signature_scan(file, signatures):
-            log(f"SIGNATURE DETECTED: {file}")
-            quarantine(file)
-            return True
+        files = []
 
-        # HEURISTIC detection
-        if heuristic_scan(file):
-            log(f"HEURISTIC DETECTED: {file}")
-            return True
+        if path.is_file():
+            files.append(path)
+        else:
+            for root, _, filenames in os.walk(path):
+                for f in filenames:
+                    files.append(Path(root) / f)
 
-        # BINARY detection
-        if file.endswith((".exe", ".dll", ".apk", ".bin")):
-            if binary_scan(file, patterns):
-                log(f"BINARY DETECTED: {file}")
-                return True
+        total = len(files)
+        threats = 0
 
-    except Exception as e:
-        log(f"ERROR scanning {file}: {e}")
+        print("\n[SCAN] Starting analysis...\n")
 
-    return False
+        for i, file in enumerate(files, 1):
 
+            result = self.engine.analyze_file(file)
 
-def scan_folder(folder, signatures, hashes, patterns):
+            if result["risk"] in ("HIGH", "CRITICAL"):
+                threats += 1
+                print(f"[THREAT] {file} -> {result['risk']} (score={result['score']})")
 
-    files = []
-
-    for root, dirs, names in os.walk(folder):
-
-        # remover diretórios ignorados
-        dirs[:] = [d for d in dirs if d not in IGNORE_DIRS]
-
-        for name in names:
-            files.append(os.path.join(root, name))
-
-    print("\n[SCAN] Starting analysis...\n")
-
-    threats = []
-
-    with ThreadPoolExecutor() as executor:
-
-        results = list(
-            tqdm(
-                executor.map(lambda f: scan_file(f, signatures, hashes, patterns), files),
-                total=len(files)
-            )
-        )
-
-    for i, result in enumerate(results):
-
-        if result:
-            threats.append(files[i])
-
-    print("\n[RESULT]")
-    print("Files scanned:", len(files))
-    print("Threats found:", len(threats))
+        print("\n[RESULT]")
+        print(f"Files scanned: {total}")
+        print(f"Threats found: {threats}")

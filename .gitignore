@@ -1,17 +1,31 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# Build
-build/
-dist/
-*.egg-info/
+# Virtual env
+venv/
+.env
 
 # Logs
 logs/
+*.log
 
-# Environment
-.env
+# Quarantine
+quarantine/
 
 # OS
 .DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# GitHub
+.github/*.secret
+
+# Keys
+*.key
+*.pem

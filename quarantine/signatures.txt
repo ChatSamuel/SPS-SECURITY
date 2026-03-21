@@ -1,5 +1,0 @@
-powershell
-cmd.exe
-wget
-curl
-base64
