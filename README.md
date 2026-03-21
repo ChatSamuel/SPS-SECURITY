@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ChatSamuel/SPS-SECURITY/main/assets/banner.png" alt="SPS Security banner">
+  <img src="https://raw.githubusercontent.com/ChatSamuel/SPS-SECURITY/main/assets/banner.png">
 </p>
 
 # SPS Security
